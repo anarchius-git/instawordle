@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- We are going to use jQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="instawordle.js"></script>
+        <style>
+        /* This whole style section is being "borrowed" from the Wordle game. It is possible to recreate it, but it is already very elegantly done. */
+            /* Global Styles & Colors */
+            :root {
+                --green: #6aaa64;
+                --darkendGreen: #538d4e;
+                --yellow: #c9b458;
+                --darkendYellow: #b59f3b;
+                --lightGray: #d8d8d8;
+                --gray: #86888a;
+                --darkGray: #939598;
+                --white: #fff;
+                --black: #212121;
+                /* Colorblind colors */
+                --orange: #f5793a;
+                --blue: #85c0f9;
+                font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+                font-size: 16px;
+                --header-height: 50px;
+                --keyboard-height: 200px;
+                --game-max-width: 500px;
+
+                /* icons */
+                --spelling-bee: url('./images/nav-icons/SpellingBee-Icon-Normalized.svg');
+                --daily: url('./images/nav-icons/Crossword-Icon-Normalized.svg');
+                --mini: url('./images/nav-icons/Mini-Icon-Normalized.svg');
+                --tiles: url('./images/nav-icons/Tiles-Icon-Normalized.svg');
+                --sudoku: url('./images/nav-icons/Sudoku-Icon-Normalized.svg');
+                --vertex: url('./images/nav-icons/Vertex-Icon-Normalized.svg');
+                --letter-boxed: url('./images/nav-icons/LetterBoxed-Icon-Normalized.svg');
+            }
+
+            /* Light theme colors */
+            :root {
+                --color-tone-1: #000000;
+                --color-tone-2: #787c7e;
+                --color-tone-3: #878a8c;
+                --color-tone-4: #d3d6da;
+                --color-tone-5: #edeff1;
+                --color-tone-6: #f6f7f8;
+                --color-tone-7: #ffffff;
+                --color-nav-hover: #f4f4f4;
+                --opacity-50: rgba(255, 255, 255, 0.5);
+            }
+
+            /* Dark Theme Colors */
+            .nightmode {
+                --color-tone-1: #ffffff;
+                --color-tone-2: #818384;
+                --color-tone-3: #565758;
+                --color-tone-4: #3a3a3c;
+                --color-tone-5: #272729;
+                --color-tone-6: #1a1a1b;
+                --color-tone-7: #121213;
+                --color-nav-hover: #2f2f31;
+                --opacity-50: rgba(0, 0, 0, 0.5);
+
+                /* dark mode icons */
+                --spelling-bee: url('./images/nav-icons/SpellingBee-Icon-Normalized-Color.svg');
+                --daily: url('./images/nav-icons/Crossword-Icon-Normalized-Color.svg');
+                --mini: url('./images/nav-icons/Mini-Icon-Normalized-Color.svg');
+                --tiles: url('./images/nav-icons/Tiles-Icon-Normalized-Color.svg');
+                --sudoku: url('./images/nav-icons/Sudoku-Icon-Normalized-Color.svg');
+                --vertex: url('./images/nav-icons/Vertex-Icon-Normalized-Color.svg');
+                --letter-boxed: url('./images/nav-icons/LetterBoxed-Icon-Normalized-Color.svg');
+            }
+
+            /* Constant colors and colors derived from theme */
+            :root,
+            .nightmode {
+                --color-background: var(--color-tone-7);
+            }
+            :root {
+                --color-present: var(--yellow);
+                --color-correct: var(--green);
+                --color-absent: var(--color-tone-2);
+                --tile-text-color: var(--color-tone-7);
+                --key-text-color: var(--color-tone-1);
+                --key-evaluated-text-color: var(--color-tone-7);
+                --key-bg: var(--color-tone-4);
+                --key-bg-present: var(--color-present);
+                --key-bg-correct: var(--color-correct);
+                --key-bg-absent: var(--color-absent);
+                --modal-content-bg: var(--color-tone-7);
+            }
+            .nightmode {
+                --color-present: var(--darkendYellow);
+                --color-correct: var(--darkendGreen);
+                --color-absent: var(--color-tone-4);
+                --tile-text-color: var(--color-tone-1);
+                --key-text-color: var(--color-tone-1);
+                --key-evaluated-text-color: var(--color-tone-1);
+                --key-bg: var(--color-tone-2);
+                --key-bg-present: var(--color-present);
+                --key-bg-correct: var(--color-correct);
+                --key-bg-absent: var(--color-absent);
+                --modal-content-bg: var(--color-tone-7);
+            }
+            .colorblind {
+                --color-correct: var(--orange);
+                --color-present: var(--blue);
+                --tile-text-color: var(--white);
+                --key-bg-present: var(--color-present);
+                --key-bg-correct: var(--color-correct);
+                --key-bg-absent: var(--color-absent);
+            }
+
+            html {
+                height: 100%;
+            }
+            body {
+                height: 100%;
+                background-color: var(--color-background);
+                margin: 0;
+                padding: 0;
+                /* Prevent scrollbar appearing on page transition */
+                overflow-y: hidden;
+            }
+            .nav-item {
+                background-color: var(--color-nav-hover);
+            }
+            p.banner-text {
+                font-family: 'nyt-franklin' !important;
+            }
+            #pz-gdpr {
+                font-family: 'nyt-franklin-700' !important;
+            }
+
+        </style>
+
+        <style>
+        /* These styles are rendered in the actual code, copying it out and making it static */
+            #game {
+                width: 100%;
+                max-width: var(--game-max-width);
+                margin: 0 auto;
+                height: calc(100% - var(--header-height));
+                display: flex;
+                flex-direction: column;
+            }
+            header {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: nowrap;
+                padding: 0 16px;
+                height: var(--header-height);
+                color: var(--color-tone-1);
+                border-bottom: 1px solid var(--color-tone-4);
+            }
+            header .title {
+                font-weight: 700;
+                font-size: 37px;
+                line-height: 100%;
+                letter-spacing: 0.01em;
+                text-align: center;
+                left: 0;
+                right: 0;
+                pointer-events: none;
+            }
+            menu-left {
+                display: flex;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                align-items: center;
+            }
+            menu-right {
+                display: inline-block;
+            }
+            #nav-button {
+                padding-top: 2px;
+            }
+        
+            @media (min-width: 415px) {
+                header {
+                    padding: 0px 16px;
+                }
+            }
+        
+            @media (max-width: 360px) {
+                header .title {
+                    font-size: 22px;
+                    letter-spacing: 0.1rem;
+                }
+            }
+        
+            #board-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-grow: 1;
+                overflow: hidden;
+            }
+            #board {
+                display: grid;
+                grid-template-rows: repeat(6, 1fr);
+                grid-gap: 5px;
+                padding:10px;
+                box-sizing: border-box;
+            }
+            button.icon {
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 0 4px;
+            }
+        
+            #debug-tools {
+                position: absolute;
+                bottom: 0;
+            }
+        </style>
+
+        <style>
+            /* Styles for the rows and tiles themselves */
+            .row {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                grid-gap: 5px;
+            }
+
+            .tile {
+                width: 100%;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 2rem;
+                line-height: 2rem;
+                font-weight: bold;
+                vertical-align: middle;
+                box-sizing: border-box;
+                color: var(--tile-text-color);
+                text-transform: uppercase;
+                user-select: none;
+            }
+            .tile::before {
+                content: '';
+                display: inline-block;
+                padding-bottom: 100%;
+            }
+
+            /* Allow tiles to be smaller on small screens */
+            @media (max-height: 600px) {
+                .tile {
+                font-size: 1em;
+                line-height: 1em;
+                }
+            }
+
+            .tile[data-state='empty'] {
+                border: 2px solid var(--color-tone-4);
+            }
+            .tile[data-state='tbd'] {
+                background-color: var(--color-tone-7);
+                border: 2px solid var(--color-tone-3);
+                color: var(--color-tone-1);
+            }
+            .tile[data-state='correct'] {
+                background-color: var(--color-correct);
+            }
+            .tile[data-state='present'] {
+                background-color: var(--color-present);
+            }
+            .tile[data-state='absent'] {
+                background-color: var(--color-absent);
+            }
+        </style>
+        <style>
+            /* Styles for the keyboard */
+
+            #keyboard {
+                margin: 0 8px;
+                user-select: none;
+            }
+    
+            #keyboard .row {
+                display: flex;
+                width: 100%;
+                margin: 0 auto 8px;
+                /* https://stackoverflow.com/questions/46167604/ios-html-disable-double-tap-to-zoom */
+                touch-action: manipulation;
+            }
+  
+            #keyboard button {
+                font-family: inherit;
+                font-weight: bold;
+                border: 0;
+                padding: 0;
+                margin: 0 6px 0 0;
+                height: 58px;
+                border-radius: 4px;
+                cursor: pointer;
+                user-select: none;
+                background-color: var(--key-bg);
+                color: var(--key-text-color);
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-transform: uppercase;
+                -webkit-tap-highlight-color: rgba(0,0,0,0.3);
+            }
+
+            #keyboard button:focus {
+                outline: none;
+            }
+
+            #keyboard button.fade {
+                transition: background-color 0.1s ease, color 0.1s ease;
+            }
+  
+            #keyboard button:last-of-type {
+                margin: 0;
+            }
+  
+            #keyboard .half {
+                flex: 0.5;
+            }
+  
+            #keyboard .one {
+                flex: 1;
+            }
+
+            #keyboard .one-and-a-half {
+                flex: 1.5;
+                font-size: 12px;
+            }
+  
+            #keyboard .two {
+                flex: 2;
+            }
+
+            #keyboard button[data-state='correct'] {
+                background-color: var(--key-bg-correct);
+                color: var(--key-evaluated-text-color);
+            }
+
+            #keyboard button[data-state='present'] {
+                background-color: var(--key-bg-present);
+                color: var(--key-evaluated-text-color);
+            }
+
+            #keyboard button[data-state='absent'] {
+                background-color: var(--key-bg-absent);
+                color: var(--key-evaluated-text-color);
+            }
+
+        </style>
+        <style>
+            /* My Styles for the Game Control button */
+
+            #gameControl {
+                margin: 8px;
+                user-select: none;
+            }
+    
+            #gameControl .row {
+                display: flex;
+                width: 100%;
+                margin: 0 auto 8px;
+                /* https://stackoverflow.com/questions/46167604/ios-html-disable-double-tap-to-zoom */
+                touch-action: manipulation;
+            }
+  
+            #gameControl button {
+                font-family: inherit;
+                font-weight: bold;
+                border: 0;
+                padding: 0;
+                margin: 0 6px 0 0;
+                height: 58px;
+                border-radius: 4px;
+                cursor: pointer;
+                user-select: none;
+                background-color: var(--key-bg);
+                color: var(--key-text-color);
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-transform: uppercase;
+                -webkit-tap-highlight-color: rgba(0,0,0,0.3);
+            }
+        </style>
+    </head>
+    <body class="nightmode">
+        <game-app>
+            <header>
+                <div class="menu-left" style="display: flex;">
+                    <!-- This does not work today-->
+                    <button id="help-button" class="icon" aria-label="Help"></button>
+                </div>
+                <div class="title">InstaWordle - Wordle without the Wait</div>
+                <div class="menu-right"></div>
+            </header>
+            <div id="game">
+                <div id="gameControl">
+                    <div class="row">
+                        <button id="gameControlButton">Reset</button>
+                    </div>
+                </div>
+                <div id="board-container">
+                    <div id="board" style="width: 350px; height: 420px;">
+                        <div class="row" id="row1" row-string="crane">
+                            <div class="tile" data-state="absent">c</div>
+                            <div class="tile" data-state="present">r</div>
+                            <div class="tile" data-state="present">a</div>
+                            <div class="tile" data-state="absent">n</div>
+                            <div class="tile" data-state="absent">e</div>
+                        </div>
+                        <div class="row" id="row2">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                        </div>
+                        <div class="row" id="row3">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                        </div>
+                        <div class="row" id="row4">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                        </div>
+                        <div class="row" id="row5">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                        </div>
+                        <div class="row" id="row6">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="keyboard">
+                    <div class="row">
+                        <button data-key="q">q</button>
+                        <button data-key="w">w</button>
+                        <button data-key="e" data-state="absent" class="">e</button>
+                        <button data-key="r" data-state="correct" class="">r</button>
+                        <button data-key="t" data-state="correct" class="">t</button>
+                        <button data-key="y">y</button>
+                        <button data-key="u" data-state="correct" class="">u</button>
+                        <button data-key="i" data-state="absent" class="">i</button>
+                        <button data-key="o" data-state="absent" class="">o</button>
+                        <button data-key="p">p</button>
+                    </div>
+                    <div class="row">
+                        <div class="spacer half"></div>
+                        <button data-key="a" data-state="correct" class="">a</button>
+                        <button data-key="s" data-state="absent" class="">s</button>
+                        <button data-key="d" data-state="absent" class="">d</button>
+                        <button data-key="f">f</button>
+                        <button data-key="g">g</button>
+                        <button data-key="h">h</button>
+                        <button data-key="j">j</button>
+                        <button data-key="k">k</button>
+                        <button data-key="l" data-state="correct" class="">l</button>
+                        <div class="spacer half"></div>
+                    </div>
+                    <div class="row">
+                        <button data-key="↵" class="one-and-a-half">enter</button>
+                        <button data-key="z">z</button>
+                        <button data-key="x">x</button>
+                        <button data-key="c" data-state="absent" class="">c</button>
+                        <button data-key="v">v</button>
+                        <button data-key="b" data-state="absent" class="">b</button>
+                        <button data-key="n" data-state="absent" class="">n</button>
+                        <button data-key="m" data-state="absent" class="">m</button>
+                        <button data-key="←" class="one-and-a-half">&lt;</game-icon></button>
+                    </div>
+                </div>
+            </div>
+        </game-app>
+    </body>
+</html>
