@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>InstaWordle - Wordle without the Wait</title>
         <!-- We are going to use jQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="instawordle.js"></script>
@@ -404,17 +405,18 @@
             <div id="game">
                 <div id="gameControl">
                     <div class="row">
-                        <button id="gameControlButton">Reset</button>
+                        <button id="gameControlButton">Reset Game</button>
+                        <button id="gameColorMode" data-state="dark">Light Mode</button>
                     </div>
                 </div>
                 <div id="board-container">
                     <div id="board" style="width: 350px; height: 420px;">
-                        <div class="row" id="row1" row-string="crane">
-                            <div class="tile" data-state="absent">c</div>
-                            <div class="tile" data-state="present">r</div>
-                            <div class="tile" data-state="present">a</div>
-                            <div class="tile" data-state="absent">n</div>
-                            <div class="tile" data-state="absent">e</div>
+                        <div class="row" id="row1" row-string="">
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
+                            <div class="tile" data-state="empty"></div>
                         </div>
                         <div class="row" id="row2">
                             <div class="tile" data-state="empty"></div>
@@ -457,37 +459,37 @@
                     <div class="row">
                         <button data-key="q">q</button>
                         <button data-key="w">w</button>
-                        <button data-key="e" data-state="absent" class="">e</button>
-                        <button data-key="r" data-state="correct" class="">r</button>
-                        <button data-key="t" data-state="correct" class="">t</button>
+                        <button data-key="e" data-state="" class="">e</button>
+                        <button data-key="r" data-state="" class="">r</button>
+                        <button data-key="t" data-state="" class="">t</button>
                         <button data-key="y">y</button>
-                        <button data-key="u" data-state="correct" class="">u</button>
-                        <button data-key="i" data-state="absent" class="">i</button>
-                        <button data-key="o" data-state="absent" class="">o</button>
+                        <button data-key="u" data-state="" class="">u</button>
+                        <button data-key="i" data-state="" class="">i</button>
+                        <button data-key="o" data-state="" class="">o</button>
                         <button data-key="p">p</button>
                     </div>
                     <div class="row">
                         <div class="spacer half"></div>
-                        <button data-key="a" data-state="correct" class="">a</button>
-                        <button data-key="s" data-state="absent" class="">s</button>
-                        <button data-key="d" data-state="absent" class="">d</button>
+                        <button data-key="a" data-state="" class="">a</button>
+                        <button data-key="s" data-state="" class="">s</button>
+                        <button data-key="d" data-state="" class="">d</button>
                         <button data-key="f">f</button>
                         <button data-key="g">g</button>
                         <button data-key="h">h</button>
                         <button data-key="j">j</button>
                         <button data-key="k">k</button>
-                        <button data-key="l" data-state="correct" class="">l</button>
+                        <button data-key="l" data-state="" class="">l</button>
                         <div class="spacer half"></div>
                     </div>
                     <div class="row">
                         <button data-key="↵" class="one-and-a-half">enter</button>
                         <button data-key="z">z</button>
                         <button data-key="x">x</button>
-                        <button data-key="c" data-state="absent" class="">c</button>
+                        <button data-key="c" data-state="" class="">c</button>
                         <button data-key="v">v</button>
-                        <button data-key="b" data-state="absent" class="">b</button>
-                        <button data-key="n" data-state="absent" class="">n</button>
-                        <button data-key="m" data-state="absent" class="">m</button>
+                        <button data-key="b" data-state="" class="">b</button>
+                        <button data-key="n" data-state="" class="">n</button>
+                        <button data-key="m" data-state="" class="">m</button>
                         <button data-key="←" class="one-and-a-half">&lt;</game-icon></button>
                     </div>
                 </div>

@@ -6,7 +6,7 @@ var allowedGuesses = ["aahed",	"aalii",	"aargh",	"aarti",	"abaca",	"abaci",	"aba
 var gameRunnning = false;
 var gameRow = 0;
 var gameAnswer = "";
-var debugMode = false;
+var debugMode = true;
 
 $(function(){
     // jQuery methods go here
@@ -14,7 +14,7 @@ $(function(){
     pickANewWord(); // Game is now running
 
     $("#gameControlButton").click(function(){
-        console.log("reset")
+        if(debugMode){console.log("Reset Game Pressed");}
         if(gameRunnning){
             // Stop and reset the game
             // Eventually this needs to wrapped in a question
@@ -23,6 +23,11 @@ $(function(){
             // Reset the game
             pickANewWord();
         }
+    });
+
+    $("#gameColorMode").click(function(){
+        if(debugMode){console.log("Color Mode Toggle Pressed. Current Mode is: " + $(this).attr("data-state"));}
+        toggleColorScheme($(this).attr("data-state"));
     });
 
     $("#keyboard button").click(function(){
@@ -154,4 +159,20 @@ function resetUI(){
     $("#board .tile").attr("data-state","empty");
     $("#board .tile").text("");
     $("#board .row").attr("row-string","");
+}
+
+function toggleColorScheme(currentScheme){
+    // Simple toggling of the color scheme
+    if(currentScheme == "dark"){
+        // switch to light scheme
+        $("body").removeClass("nightmode");
+        $("#gameColorMode").attr("data-state","light").text("Dark Mode");
+        if(debugMode){console.log("Switched to Light Mode");}
+
+    } else {
+        // switch to dark scheme
+        $("body").addClass("nightmode");
+        $("#gameColorMode").attr("data-state","dark").text("Light Mode");
+        if(debugMode){console.log("Switched to Dark Mode");}
+    }
 }
