@@ -7,6 +7,7 @@ var gameRunnning = false;
 var gameRow = 0;
 var gameAnswer = "";
 var debugMode = true;
+var gameWordLength = 5;
 
 $(function(){
     // jQuery methods go here
@@ -69,7 +70,7 @@ function appendLetter(newLetter){
     // Append letter
     if(debugMode){console.log("Processing letter for appending");}
     var currentRowString = $("#board #row" + gameRow).attr("row-string");
-    if(currentRowString.length < 5){
+    if(currentRowString.length < gameWordLength){
         $("#board #row" + gameRow).attr("row-string", currentRowString + newLetter);
     }
     rowToTiles();
@@ -85,20 +86,49 @@ function rowToTiles(){
     }
 }
 
+function evaluateGuess(){
+    if(debugMode){console.log("Evaluating the guessed word");}
+    // Guess is evaluated
+    var testRowString = $("#board #row" + gameRow).attr("row-string");
+    // Test if the word is (gameWordLength) letters long.
+    if(testRowString.length < gameWordLength) {
+        alertString = "You need a " + gameWordLength + " letter word to test. Your guess only has " + testRowString.length + " letters.";
+        $("#board").notify(alertString, {position:"top center", className: "error"});
+    } else {
+        // Did you get the right answer
+        if(testRowString == gameAnswer) {
+            paintTiles();
+            $("#board").notify("Congratulations, you solved the InstaWordle. Click Reset Game to start again.", {position:"top center", className: "success"});
+            setGameState(false);
+        } else {
+            // Check if this word is in either lists
+            if( allowedWords.indexOf(testRowString) > -1 || allowedGuesses.indexOf(testRowString) > -1 ) {
+                // valid word
+                paintTiles();
+                gameRow++;
+            } else {
+                // invalid word
+                $("#board").notify("This is not a valid 5-letter word.", {position:"top center", className: "error"});
+                //alert("This not a valid word.")        
+            }
+        }
+    }
+}
+
 function paintTiles(){
     // This colors the tiles after a successful guess of a valid answer. This will handle the "all correct" scenario as well
     var currentRowString = $("#board #row" + gameRow).attr("row-string");
     var currentRowArray = currentRowString.split('');
     var gameAnswerArray = gameAnswer.split('');
-    for(i = 0; i < 5; i++){
+    for(i = 0; i < gameWordLength; i++){
         if(gameAnswerArray.indexOf(currentRowArray[i]) > -1){
             // letter is in the answer
             if(currentRowArray[i] == gameAnswerArray[i]){
                 // right position
-                $("#board #row" + gameRow +" .tile:nth-child(" + (i + 1) + ")").attr("data-state","correct");
+                $("#board #row" + gameRow +" .tile:nth-child(" + (i + 1) + ")").attr("data-state","correct").shake({direction: "up", distance: 10, times: 3, speed: 75 });
                 updateKeyboardColor(currentRowArray[i], "correct");
             } else {
-                $("#board #row" + gameRow +" .tile:nth-child(" + (i + 1) + ")").attr("data-state","present");
+                $("#board #row" + gameRow +" .tile:nth-child(" + (i + 1) + ")").attr("data-state","present").shake({direction: "left", distance: 5, times: 1, speed: 50 });
                 updateKeyboardColor(currentRowArray[i], "present");
             }
         } else {
@@ -117,34 +147,9 @@ function updateKeyboardColor(charCode, levelString){
     }
 }
 
-function evaluateGuess(){
-    if(debugMode){console.log("Evaluating the guessed word");}
-    // Guess is evaluated
-    var testRowString = $("#board #row" + gameRow).attr("row-string");
-    // Test if the word is 5 letters long.
-    if(testRowString.length < 5) {
-        alert("You need a 5 letter word to test. Your guess only has " + testRowString.length + " letters.")
-    }
-    // Did you get the right answer
-    if(testRowString == gameAnswer) {
-        paintTiles();
-        //alert("Congratulations, you solved the InstaWordle.");
-        stopGame(true);
-    } else {
-        // Check if this word is in either lists
-        if( allowedWords.indexOf(testRowString) > -1 || allowedGuesses.indexOf(testRowString) > -1 ) {
-            // valid word
-            paintTiles();
-            gameRow++;
-        } else {
-            // invalid word
-            alert("This not a valid word.")        }
-    }
-}
-
-function stopGame(successState){
+function setGameState(successState){
     // Stops the game
-    gameRunnning = false;
+    gameRunnning = successState;
 }
 
 function resetGameAttributes(){
