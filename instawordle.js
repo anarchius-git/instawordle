@@ -6,7 +6,7 @@ var allowedGuesses = ["aahed",	"aalii",	"aargh",	"aarti",	"abaca",	"abaci",	"aba
 var gameRunnning = false;
 var gameRow = 0;
 var gameAnswer = "";
-var debugMode = true;
+var debugMode = false;
 var gameWordLength = 5;
 
 $(function(){
